@@ -1,7 +1,5 @@
 # monitor.py
-
 from ping3 import ping
-import socket
 
 def run_ping_traceroute(domain: str) -> str:
     output = []
@@ -11,6 +9,14 @@ def run_ping_traceroute(domain: str) -> str:
     for i in range(3):
         try:
             rtt = ping(domain, unit="ms", timeout=2)
-            output.append(f"  Attempt {i+1}: {rtt:.1f} ms" if rtt else f"  Attempt {i+1}: timeout")
+            if rtt is None:
+                output.append(f"  Attempt {i+1}: timeout")
+            else:
+                output.append(f"  Attempt {i+1}: {rtt:.1f} ms")
         except Exception as e:
-            output.appen
+            output.append(f"  Attempt {i+1}: error ({e})")
+
+    # 2) Traceroute not available
+    output.append("\nTraceroute: not available in this environment")
+
+    return "\n".join(output)
