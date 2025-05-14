@@ -2,3 +2,4 @@ streamlit
 speedtest-cli
 openai
 sendgrid
+ping3
