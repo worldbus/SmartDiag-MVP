@@ -1,12 +1,16 @@
-import subprocess
+# monitor.py
+
+from ping3 import ping
+import socket
 
 def run_ping_traceroute(domain: str) -> str:
-    ping = subprocess.run(
-        ["ping", "-c", "3", domain],
-        capture_output=True, text=True
-    ).stdout
-    trace = subprocess.run(
-        ["traceroute", "-m", "10", domain],
-        capture_output=True, text=True
-    ).stdout
-    return f"Ping Results:\n{ping}\nTraceroute Results:\n{trace}"
+    output = []
+
+    # 1) Ping 3 times
+    output.append("Ping Results (RTT in ms):")
+    for i in range(3):
+        try:
+            rtt = ping(domain, unit="ms", timeout=2)
+            output.append(f"  Attempt {i+1}: {rtt:.1f} ms" if rtt else f"  Attempt {i+1}: timeout")
+        except Exception as e:
+            output.appen
