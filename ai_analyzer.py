@@ -1,0 +1,18 @@
+import openai
+import os
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+def analyze_results(domain: str, ping_trace: str, speed: dict) -> str:
+    prompt = (
+        f"Domain: {domain}\n\n"
+        f"{ping_trace}\n\n"
+        f"Speed test: {speed}\n\n"
+        "Please summarize these results in plain English."
+    )
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role":"user","content":prompt}],
+        max_tokens=150
+    )
+    return response.choices[0].message.content.strip()
