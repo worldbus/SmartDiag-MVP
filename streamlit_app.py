@@ -1,3 +1,15 @@
+# streamlit_app.py
+
+import os
+from dotenv import load_dotenv
+
+# absolutely first thing: load .env from this folder
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+
+import streamlit as st
+from ai_analyzer import analyze_results
+# … rest of  imports …
+
 import streamlit as st
 from monitor import run_ping_traceroute
 from speedtest_cli import run_speed_test
