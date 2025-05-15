@@ -3,12 +3,8 @@
 import os
 from dotenv import load_dotenv
 
-# absolutely first thing: load .env from this folder
+# 1) Load .env as early as humanly possible
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
-
-import streamlit as st
-from ai_analyzer import analyze_results
-# … rest of  imports …
 
 import streamlit as st
 from monitor import run_ping_traceroute
@@ -17,19 +13,25 @@ from ai_analyzer import analyze_results
 from token_handler import generate_token
 from email_sender import send_cancel_email
 
+# 2) DEBUG: confirm key is loaded (remove this in production)
+st.sidebar.markdown(
+    "**DEBUG**: OPENAI_API_KEY → "
+    f"`{os.getenv('OPENAI_API_KEY')[:4] or 'None'}`"
+)
+
 st.set_page_config(page_title="SmartDiag Demo", layout="centered")
 st.title("SmartDiag Network Diagnostics")
 
 # Feature toggles
-do_ping = st.checkbox("📶 Ping & Traceroute", True)
-do_speed = st.checkbox("⚡ Speed Test", True)
-do_ai = st.checkbox("🤖 AI Analysis", True)
+do_ping      = st.checkbox("📶 Ping & Traceroute", True)
+do_speed     = st.checkbox("⚡ Speed Test",        True)
+do_ai        = st.checkbox("🤖 AI Analysis",      True)
 notify_email = st.checkbox("✉️ Email Cancel Link", True)
 st.markdown("---")
 
 # Inputs
 domain = st.text_input("Domain or IP", "example.com")
-email  = st.text_input("Your Email", "you@example.com")
+email  = st.text_input("Your Email",    "you@example.com")
 
 if st.button("Run Diagnostics"):
     if not domain or (notify_email and not email):
@@ -59,7 +61,7 @@ if st.button("Run Diagnostics"):
             st.write(summary)
 
         if notify_email:
-            token = generate_token(domain, email)
+            token      = generate_token(domain, email)
             cancel_url = (
                 f"https://share.streamlit.io/YourUserName/SmartDiag-MVP/"
                 f"main/streamlit_app.py?cancel={token}"
