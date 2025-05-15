@@ -1,7 +1,10 @@
-import openai
-import os
+# ai_analyzer.py
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+import os
+from openai import OpenAI
+
+# instantiate the new client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def analyze_results(domain: str, ping_trace: str, speed: dict) -> str:
     prompt = (
@@ -10,9 +13,11 @@ def analyze_results(domain: str, ping_trace: str, speed: dict) -> str:
         f"Speed test: {speed}\n\n"
         "Please summarize these results in plain English."
     )
-    response = openai.ChatCompletion.create(
+    # use the new chat.completions endpoint
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
-        messages=[{"role":"user","content":prompt}],
+        messages=[{"role": "user", "content": prompt}],
         max_tokens=150
     )
+    # new API returns message under .choices[0].message.content
     return response.choices[0].message.content.strip()
