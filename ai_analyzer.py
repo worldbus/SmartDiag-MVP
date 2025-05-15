@@ -2,9 +2,7 @@
 
 import os
 from openai import OpenAI
-from openai.error import RateLimitError, AuthenticationError
 
-# Instantiate new v1 client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def analyze_results(domain: str, ping_trace: str, speed: dict) -> str:
@@ -21,10 +19,10 @@ def analyze_results(domain: str, ping_trace: str, speed: dict) -> str:
             max_tokens=150
         )
         return response.choices[0].message.content.strip()
-
-    except RateLimitError:
-        return "**AI Analysis temporarily unavailable (rate limit).**"
-    except AuthenticationError:
-        return "**AI Analysis unavailable: invalid API key.**"
     except Exception as e:
-        return f"**AI Analysis error:** {e}"
+        err = str(e)
+        if "RateLimitError" in err:
+            return "**AI Analysis temporarily unavailable (rate limit).**"
+        if "AuthenticationError" in err or "Invalid API Key" in err:
+            return "**AI Analysis unavailable: invalid API key.**"
+        return f"**AI Analysis error:** {err}"
