@@ -1,5 +1,5 @@
 streamlit
 speedtest-cli
-openai
+openai>=1.0.0
 sendgrid
 ping3
