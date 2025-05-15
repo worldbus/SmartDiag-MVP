@@ -1,36 +1,35 @@
 # monitor.py
 
-from ping3 import ping
-import socket
-import time
+import subprocess
 
 def run_ping_traceroute(domain: str) -> str:
-    output = []
-    output.append("Ping Results (RTT in ms):")
+    lines = []
 
-    for i in range(3):
-        # 1) Try ping3 without root privileges
-        try:
-            rtt = ping(domain, unit="ms", timeout=2, privileged=False)
-            if rtt is None:
-                output.append(f"  Attempt {i+1}: timeout")
-            else:
-                output.append(f"  Attempt {i+1}: {rtt:.1f} ms")
-            continue
-        except Exception:
-            pass
+    # 1) Real ping
+    lines.append("Ping Results:")
+    try:
+        ping_proc = subprocess.run(
+            ["ping", "-c", "3", domain],
+            capture_output=True, text=True, check=True
+        )
+        lines.append(ping_proc.stdout.strip())
+    except subprocess.CalledProcessError as e:
+        # non-zero exit code (e.g., host unreachable)
+        lines.append(f"Ping failed:\n{e.stdout or e.stderr}".strip())
+    except Exception as e:
+        lines.append(f"Ping error: {e}")
 
-        # 2) Fallback: TCP handshake timing on port 80
-        start = time.time()
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(2)
-            sock.connect((domain, 80))
-            sock.close()
-            elapsed = (time.time() - start) * 1000
-            output.append(f"  Attempt {i+1}: {elapsed:.1f} ms (TCP connect)")
-        except Exception as ex:
-            output.append(f"  Attempt {i+1}: error ({ex})")
+    # 2) Real traceroute
+    lines.append("\nTraceroute Results:")
+    try:
+        trace_proc = subprocess.run(
+            ["traceroute", "-m", "10", domain],
+            capture_output=True, text=True, check=True
+        )
+        lines.append(trace_proc.stdout.strip())
+    except subprocess.CalledProcessError as e:
+        lines.append(f"Traceroute failed:\n{e.stdout or e.stderr}".strip())
+    except Exception as e:
+        lines.append(f"Traceroute error: {e}")
 
-    output.append("\nTraceroute: not available in this environment")
-    return "\n".join(output)
+    return "\n".join(lines)
